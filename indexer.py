@@ -1,4 +1,3 @@
-from algosdk.v2client.algod import AlgodClient
 from algosdk.v2client.indexer import IndexerClient
 from base64 import b64decode
 from supabase import create_client
@@ -9,22 +8,12 @@ from time import sleep
 url = 'https://efxybjvydtmjzzsliimd.supabase.co'
 key = os.environ['supabase_key']
 client_supabase = create_client(url, key)
-
 FEES_ADDRESS = '3FXLFER4JF4SPVBSSTPZWGTFUYSD54QOEZ4Y4TV4ZTRHERT2Z6DH7Q54YQ'
-algod_token_tx = ""
-headers_tx = {"X-Algo-API-Token": algod_token_tx}
-client = AlgodClient(
-    algod_token=algod_token_tx,
-    algod_address="https://testnet-api.voi.nodly.io:443",
-    headers=headers_tx,
-)
 indexer_client = IndexerClient(
     indexer_token="",
     indexer_address="https://testnet-idx.voi.nodly.io",
     headers={"X-Algo-API-Token": ""}
 )
-
-
 
 
 def manager_round(round_num):
@@ -119,15 +108,23 @@ def manager_round(round_num):
                     client_supabase.table('listings').update({'status': status}).eq('app_id', application_id).execute()
 
 
-check_round = indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=0)['current-round']
+def start_indexer(check_round=None):
+    if check_round is None:
+        check_round = indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=0)['current-round']
 
-while True:
-    current_round = indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=check_round)['current-round']
-    while current_round < check_round:
-        sleep(1)
-        current_round = indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=check_round)['current-round']
-    try:
-        manager_round(check_round)
-    except:
-        print("error", check_round)
-    check_round += 1
+    while True:
+        current_round = indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=check_round)[
+            'current-round']
+        while current_round < check_round:
+            sleep(1)
+            current_round = indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=check_round)[
+                'current-round']
+        try:
+            manager_round(check_round)
+        except:
+            print("error", check_round)
+        check_round += 1
+
+
+if __name__ == "__main__":
+    start_indexer()
