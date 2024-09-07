@@ -16,10 +16,24 @@ indexer_client = IndexerClient(
 )
 
 
+def decode_note(inner_txns):
+    try:
+        return b64decode(inner_txns[0]['note']).decode('ascii')
+    except:
+        return None
+
 def manager_round(round_num):
     chain = 'voi:testnet'
     for transaction in indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=round_num)['transactions']:
         if 'application-transaction' in transaction and 'inner-txns' in transaction:
+            if 'application-id' not in transaction['application-transaction']:
+                continue
+            if 'application-args' not in transaction['application-transaction']:
+                continue
+            if 'sender' not in transaction:
+                continue
+            if 'id' not in transaction:
+                continue
             application_id = transaction['application-transaction']['application-id']
             app_args = transaction['application-transaction']['application-args']
             sender = transaction['sender']
@@ -28,7 +42,11 @@ def manager_round(round_num):
             inner_txns = [tx for tx in transaction['inner-txns']
                           if 'note' in tx and 'tx-type' in tx and tx['payment-transaction']['receiver'] == FEES_ADDRESS]
             if len(inner_txns) == 1:
-                note = b64decode(inner_txns[0]['note']).decode('ascii')
+                note = decode_note(inner_txns)
+                if note is None:
+                    continue
+                if len(note.split(",")) != 3:
+                    continue
                 type_tx = note.split(",")[0]
                 action_tx = note.split(",")[1]
                 currency_tx = note.split(",")[2]
