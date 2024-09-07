@@ -8,7 +8,7 @@ from time import sleep
 url = 'https://efxybjvydtmjzzsliimd.supabase.co'
 key = os.environ['supabase_key']
 client_supabase = create_client(url, key)
-FEES_ADDRESS = '3FXLFER4JF4SPVBSSTPZWGTFUYSD54QOEZ4Y4TV4ZTRHERT2Z6DH7Q54YQ'
+FEES_ADDRESS = 'LIEGRVYHMVOL6YHXXP6ZIX4EEUCHDCRQLUBWWTMMV6V77SS5C4AUMOWBSE'
 indexer_client = IndexerClient(
     indexer_token="",
     indexer_address="https://testnet-idx.voi.nodly.io",
@@ -48,8 +48,7 @@ def manager_round(round_num):
                         price = int.from_bytes(b64decode(app_args[1]), byteorder='big')
                     if currency_tx == '1/72':
                         currency = 1
-                        price = [element for element in transaction['global-state-delta']
-                                 if element['key'] == 'YmlkX2Ftb3VudA=='][0]['value']['uint']
+                        price = [element for element in transaction['global-state-delta'] if element['key'] == 'YmlkX2Ftb3VudA=='][0]['value']['uint']
                 if action_tx == 'close':
                     status = 'closed'
                     if currency_tx == '1/72':
@@ -65,7 +64,7 @@ def manager_round(round_num):
                     status = 'closed'
                     if type_tx == 'sale':
                         if currency_tx == '1/72':
-                            price = transaction['inner-txns'][1]['payment-transaction']['amount']
+                            price = transaction['inner-txns'][1]['payment-transaction']['amount'] + transaction['inner-txns'][3]['payment-transaction']['amount']
                             currency = 0
                         if currency_tx == '200/72':
                             currency = transaction['inner-txns'][2]['application-transaction']['application-id']
@@ -86,7 +85,7 @@ def manager_round(round_num):
                             currency = transaction['inner-txns'][1]['application-transaction']['application-id']
                     if type_tx == 'dutch':
                         if currency_tx == '1/72':
-                            price = transaction['inner-txns'][0]['payment-transaction']['amount']
+                            price = transaction['inner-txns'][1]['payment-transaction']['amount'] + transaction['inner-txns'][3]['payment-transaction']['amount']
                             currency = 0
                         if currency_tx == '200/72':
                             price = int.from_bytes(b64decode(app_args[1]), byteorder='big')
