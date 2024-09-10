@@ -54,6 +54,7 @@ def decode_note(inner_txns):
 
 
 def manager_round(round_num):
+    print(round_num)
     for transaction in indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=round_num)['transactions']:
         required_params = ['application-transaction', 'inner-txns', 'sender', 'id']
         if not all(param in transaction for param in required_params):
@@ -114,6 +115,17 @@ def manager_round(round_num):
                 currency = [element for element in indexer_client.applications(transaction['application-transaction']['application-id'])['application']['params']['global-state'] if element['key'] == 'cGFpbWVudF9hc2FfaWQ='][0]['value']['uint']
             price = [element for element in transaction['global-state-delta'] if b64decode(element['key']) == b'bid_amount'][0]['value']['uint']
 
+        print({
+            'id': tx_id,
+            'from_address': sender,
+            'chain': chain,
+            'app_id': application_id,
+            'type': action_tx,
+            'amount': price,
+            'currency': currency,
+            'note': note,
+            'group_id': group
+        })
         client_supabase.table('transactions').upsert({
             'id': tx_id,
             'from_address': sender,
