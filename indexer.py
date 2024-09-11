@@ -144,11 +144,11 @@ def manager_round(round_num):
 
 def start_indexer(check_round=None):
     if check_round is None:
-        check_round = algod_client.status()['last-round']
+        check_round = algod_client.status()['last-round'] - 2
 
     while True:
         current_round = algod_client.status()['last-round']
-        while current_round < check_round:
+        while current_round - 2 < check_round:
             sleep(1)
             current_round = algod_client.status()['last-round']
         try:
