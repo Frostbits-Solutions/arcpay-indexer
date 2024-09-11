@@ -56,10 +56,13 @@ def decode_note(inner_txns):
 def manager_round(round_num):
     print(round_num)
     for transaction in indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=round_num)['transactions']:
+        print("find tx to fees address on this round")
         required_params = ['application-transaction', 'inner-txns', 'sender', 'id']
         if not all(param in transaction for param in required_params):
+            print(f"not all {required_params} in transaction")
             continue
         if 'application-id' not in transaction['application-transaction']:
+            print("not application-id in transaction['application-transaction']")
             continue
         application_id = transaction['application-transaction']['application-id']
         sender = transaction['sender']
@@ -68,9 +71,11 @@ def manager_round(round_num):
         inner_txns = [tx for tx in transaction['inner-txns']
                       if 'note' in tx and 'tx-type' in tx and tx['payment-transaction']['receiver'] == FEES_ADDRESS]
         if len(inner_txns) != 1:
+            print("len inner_txns is not 1")
             continue
         note = decode_note(inner_txns)
         if note not in note_authorized:
+            print("note is not on proper format")
             continue
         action_tx = note.split(",")[1]
         currency_tx = note.split(",")[2].split("/")[0]
