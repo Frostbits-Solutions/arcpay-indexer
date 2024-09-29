@@ -24,7 +24,7 @@ note_authorized_param = {
         'currency': ['1/72', '1/asa', 'asa/asa', '200/72']
     },
     'sale': {
-        'actions': ['create', 'buy', 'update', 'cancel'],
+        'actions': ['create', 'buy', 'cancel'],
         'currency': ['1/72', '1/asa', '1/rwa', 'asa/asa', 'asa/rwa', '200/72', '200/rwa']
     },
     'dutch': {
@@ -94,7 +94,7 @@ def manager_round(round_num):
         price = None
         currency = None
         status = None
-        if action_tx in ['update', 'cancel', 'create']:
+        if action_tx in ['cancel', 'create']:
             if action_tx == 'create':
                 status = 'active'
             if action_tx == 'cancel':
