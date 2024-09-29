@@ -70,6 +70,9 @@ def manager_round(round_num):
         if 'snd' not in transaction['txn']:
             print("'snd' not in transaction['txn']")
             continue
+        if 'grp' not in transaction['txn']:
+            print("'grp' not in transaction['txn']")
+            continue
         if 'dt' not in transaction:
             print("'dt' not in transaction")
             continue
@@ -78,7 +81,7 @@ def manager_round(round_num):
             continue
 
         application_id = transaction['txn']['apid']
-        group = transaction['txn']['grp'] if 'grp' in transaction['txn'] else None
+        group = transaction['txn']['grp']
         sender = transaction['txn']['snd']
         tx_id = group
 
