@@ -1,0 +1,1 @@
+docker build -t arcpay/indexer . && docker stack deploy -c ./docker-compose.yaml --detach=true arcpay-indexer

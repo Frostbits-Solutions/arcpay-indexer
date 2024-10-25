@@ -4,10 +4,10 @@ from time import sleep
 from algosdk.v2client.algod import AlgodClient
 from base64 import b64decode
 from supabase import create_client
+from get_docker_secret import get_docker_secret
 
-
-SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
-SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
+SUPABASE_URL = get_docker_secret('SUPABASE_URL')
+SUPABASE_KEY = get_docker_secret('SUPABASE_KEY')
 CHAIN = os.environ.get('CHAIN', 'algo:testnet')
 FEES_ADDRESS = os.environ.get('FEES_ADDRESS', 'UTOIVZJSC36XCL4HBVKHFYDA5WMBJQNR7GM3NPK5M7OH2SQBJW3KTUKZAA')
 ALGOD_ADDRESS = os.environ.get('ALGOD_ADDRESS', 'http://localhost:4191')

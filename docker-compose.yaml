@@ -2,8 +2,7 @@ version: '3.1'
 
 services:
   prod-indexer-algo-mainnet:
-    build: .
-    container_name: prod-indexer-algo-mainnet
+    image: arcpay/indexer:latest
     environment:
       SUPABASE_URL: /run/secrets/prod_supabase_url
       SUPABASE_KEY: /run/secrets/prod_supabase_key
@@ -15,8 +14,7 @@ services:
        - prod_supabase_key
   
   prod-indexer-algo-testnet:
-    build: .
-    container_name: prod-indexer-algo-testnet
+    image: arcpay/indexer:latest
     environment:
       SUPABASE_URL: /run/secrets/prod_supabase_url
       SUPABASE_KEY: /run/secrets/prod_supabase_key
@@ -28,8 +26,7 @@ services:
        - prod_supabase_key
 
   # prod-indexer-voi-mainnet:
-  #   build: .
-  #   container_name: prod-indexer-voi-mainnet
+  #   image: arcpay/indexer:latest
   #   environment:
   #     SUPABASE_URL: /run/secrets/prod_supabase_url
   #     SUPABASE_KEY: /run/secrets/prod_supabase_key
@@ -41,8 +38,7 @@ services:
   #      - prod_supabase_key
   #
   # prod-indexer-voi-testnet:
-  #   build: .
-  #   container_name: prod-indexer-voi-testnet
+  #   image: arcpay/indexer:latest
   #   environment:
   #     SUPABASE_URL: /run/secrets/prod_supabase_url
   #     SUPABASE_KEY: /run/secrets/prod_supabase_key
@@ -54,8 +50,7 @@ services:
   #      - prod_supabase_key
   #
   # dev-indexer-algo-testnet:
-  #   build: .
-  #   container_name: dev-indexer-algo-testnet
+  #   image: arcpay/indexer:latest
   #   environment:
   #     SUPABASE_URL: /run/secrets/dev_supabase_url
   #     SUPABASE_KEY: /run/secrets/dev_supabase_key
@@ -67,8 +62,7 @@ services:
   #      - dev_supabase_key
   #
   # dev-indexer-voi-testnet:
-  #   build: .
-  #   container_name: dev-indexer-voi-testnet
+  #   image: arcpay/indexer:latest
   #   environment:
   #     SUPABASE_URL: /run/secrets/dev_supabase_url
   #     SUPABASE_KEY: /run/secrets/dev_supabase_key
