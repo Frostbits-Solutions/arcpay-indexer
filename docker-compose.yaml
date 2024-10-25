@@ -1,0 +1,80 @@
+version: '3'
+
+services:
+  prod-indexer-algo-mainnet:
+    build: .
+    container_name: prod-indexer-algo-mainnet
+    environment:
+      SUPABASE_URL: /run/secrets/prod_supabase_url
+      SUPABASE_KEY: /run/secrets/prod_supabase_key
+      CHAIN: algo:mainnet
+      FEES_ADDRESS: 6HCTMFZZ7H3Y2SLTMYNLU73OUOML4X3Q6FSED7UIOFXLN5AKCRSR6EHGJ4
+      ALGOD_ADDRESS: http://localhost:4190
+    secrets:
+       - prod_supabase_url
+       - prod_supabase_key
+  
+  prod-indexer-algo-testnet:
+    build: .
+    container_name: prod-indexer-algo-testnet
+    environment:
+      SUPABASE_URL: /run/secrets/prod_supabase_url
+      SUPABASE_KEY: /run/secrets/prod_supabase_key
+      CHAIN: algo:testnet
+      FEES_ADDRESS: UTOIVZJSC36XCL4HBVKHFYDA5WMBJQNR7GM3NPK5M7OH2SQBJW3KTUKZAA
+      ALGOD_ADDRESS: http://localhost:4191
+    secrets:
+       - prod_supabase_url
+       - prod_supabase_key
+
+  # prod-indexer-voi-mainnet:
+  #   build: .
+  #   container_name: prod-indexer-voi-mainnet
+  #   environment:
+  #     SUPABASE_URL: /run/secrets/prod_supabase_url
+  #     SUPABASE_KEY: /run/secrets/prod_supabase_key
+  #     CHAIN: voi:mainnet
+  #     FEES_ADDRESS: <PROD_VOI_MAINNET_FEES_ADDRESS>
+  #     ALGOD_ADDRESS: http://localhost:4192
+  #   secrets:
+  #      - prod_supabase_url
+  #      - prod_supabase_key
+  #
+  # prod-indexer-voi-testnet:
+  #   build: .
+  #   container_name: prod-indexer-voi-testnet
+  #   environment:
+  #     SUPABASE_URL: /run/secrets/prod_supabase_url
+  #     SUPABASE_KEY: /run/secrets/prod_supabase_key
+  #     CHAIN: voi:testnet
+  #     FEES_ADDRESS: <PROD_VOI_TESTNET_FEES_ADDRESS>
+  #     ALGOD_ADDRESS: http://localhost:4193
+  #   secrets:
+  #      - prod_supabase_url
+  #      - prod_supabase_key
+  #
+  # dev-indexer-algo-testnet:
+  #   build: .
+  #   container_name: dev-indexer-algo-testnet
+  #   environment:
+  #     SUPABASE_URL: /run/secrets/dev_supabase_url
+  #     SUPABASE_KEY: /run/secrets/dev_supabase_key
+  #     CHAIN: algo:testnet
+  #     FEES_ADDRESS: <DEV_ALGO_TESTNET_FEES_ADDRESS>
+  #     ALGOD_ADDRESS: http://localhost:4191
+  #   secrets:
+  #      - dev_supabase_url
+  #      - dev_supabase_key
+  #
+  # dev-indexer-voi-testnet:
+  #   build: .
+  #   container_name: dev-indexer-voi-testnet
+  #   environment:
+  #     SUPABASE_URL: /run/secrets/dev_supabase_url
+  #     SUPABASE_KEY: /run/secrets/dev_supabase_key
+  #     CHAIN: voi:testnet
+  #     FEES_ADDRESS: <DEV_VOI_TESTNET_FEES_ADDRESS>
+  #     ALGOD_ADDRESS: http://localhost:4193
+  #   secrets:
+  #      - dev_supabase_url
+  #      - dev_supabase_key

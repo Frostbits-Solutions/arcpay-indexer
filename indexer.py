@@ -1,25 +1,22 @@
+import os
+import json
+from time import sleep
 from algosdk.v2client.algod import AlgodClient
-from algosdk.v2client.indexer import IndexerClient
 from base64 import b64decode
 from supabase import create_client
-import os
-from time import sleep
 
 
-url = 'https://efxybjvydtmjzzsliimd.supabase.co'
-key = os.environ['supabase_key']
-client_supabase = create_client(url, key)
-FEES_ADDRESS = 'LIEGRVYHMVOL6YHXXP6ZIX4EEUCHDCRQLUBWWTMMV6V77SS5C4AUMOWBSE'
-chain = 'voi:testnet'
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
+CHAIN = os.environ.get('CHAIN', 'algo:testnet')
+FEES_ADDRESS = os.environ.get('FEES_ADDRESS', 'UTOIVZJSC36XCL4HBVKHFYDA5WMBJQNR7GM3NPK5M7OH2SQBJW3KTUKZAA')
+ALGOD_ADDRESS = os.environ.get('ALGOD_ADDRESS', 'http://localhost:4191')
 
-indexer_client = IndexerClient(
-    indexer_token="",
-    indexer_address="https://testnet-idx.voi.nodly.io",
-    headers={"X-Algo-API-Token": ""}
-)
+client_supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 algod_client = AlgodClient(
     algod_token="",
-    algod_address="https://testnet-api.voi.nodly.io:443",
+    algod_address=ALGOD_ADDRESS,
     headers={"X-Algo-API-Token": ""},
 )
 
@@ -29,7 +26,7 @@ note_authorized_param = {
         'currency': ['1/72', '1/asa', 'asa/asa', '200/72']
     },
     'sale': {
-        'actions': ['create', 'buy', 'update', 'cancel'],
+        'actions': ['create', 'buy', 'cancel'],
         'currency': ['1/72', '1/asa', '1/rwa', 'asa/asa', 'asa/rwa', '200/72', '200/rwa']
     },
     'dutch': {
@@ -45,35 +42,50 @@ note_authorized = [
     for currency in params['currency']
 ]
 
-
-def decode_note(inner_txns):
+def decode_note(transaction):
     try:
-        return b64decode(inner_txns[0]['note']).decode('ascii')
+        inner_txns = [tx for tx in transaction['dt']['itx']
+                      if 'note' in tx['txn'] and tx['txn']['type'] == 'pay' and tx['txn']['rcv'] == FEES_ADDRESS]
+        return b64decode(inner_txns[0]['txn']['note']).decode('ascii')
     except:
         return None
 
-
 def manager_round(round_num):
     print(round_num)
-    for transaction in indexer_client.search_transactions_by_address(FEES_ADDRESS, round_num=round_num)['transactions']:
+    block = algod_client.block_info(round_num)['block']
+    if 'txns' not in block:
+        return None
+    relevant_transactions = [txn for txn in block['txns']
+                             if 'txn' in txn and 'apat' in txn['txn'] and FEES_ADDRESS in txn['txn']['apat']]
+
+    for transaction in relevant_transactions:
         print("find tx to fees address on this round")
-        required_params = ['application-transaction', 'inner-txns', 'sender', 'id']
-        if not all(param in transaction for param in required_params):
-            print(f"not all {required_params} in transaction")
+
+        if 'txn' not in transaction:
+            print("'txn' not in transaction")
             continue
-        if 'application-id' not in transaction['application-transaction']:
-            print("not application-id in transaction['application-transaction']")
+        if 'apid' not in transaction['txn']:
+            print("'apid' not in transaction['txn']")
             continue
-        application_id = transaction['application-transaction']['application-id']
-        sender = transaction['sender']
-        tx_id = transaction['id']
-        group = transaction['group'] if 'group' in transaction else None
-        inner_txns = [tx for tx in transaction['inner-txns']
-                      if 'note' in tx and 'tx-type' in tx and tx['payment-transaction']['receiver'] == FEES_ADDRESS]
-        if len(inner_txns) != 1:
-            print("len inner_txns is not 1")
+        if 'snd' not in transaction['txn']:
+            print("'snd' not in transaction['txn']")
             continue
-        note = decode_note(inner_txns)
+        if 'grp' not in transaction['txn']:
+            print("'grp' not in transaction['txn']")
+            continue
+        if 'dt' not in transaction:
+            print("'dt' not in transaction")
+            continue
+        if 'itx' not in transaction['dt']:
+            print("'itx' not in transaction['dt']")
+            continue
+
+        application_id = transaction['txn']['apid']
+        group = transaction['txn']['grp']
+        sender = transaction['txn']['snd']
+        tx_id = group
+
+        note = decode_note(transaction)
         if note not in note_authorized:
             print("note is not on proper format")
             continue
@@ -82,7 +94,7 @@ def manager_round(round_num):
         price = None
         currency = None
         status = None
-        if action_tx in ['update', 'cancel', 'create']:
+        if action_tx in ['cancel', 'create']:
             if action_tx == 'create':
                 status = 'active'
             if action_tx == 'cancel':
@@ -93,37 +105,23 @@ def manager_round(round_num):
 
             if currency_tx == '1':
                 currency = 0
-                price = transaction['inner-txns'][1]['payment-transaction']['amount'] + transaction['inner-txns'][3]['payment-transaction']['amount']
+                price_1 = transaction['dt']['itx'][1]['txn']['amt'] if 'amt' in transaction['dt']['itx'][1]['txn'] else 0
+                price_2 = transaction['dt']['itx'][3]['txn']['amt'] if 'amt' in transaction['dt']['itx'][3]['txn'] else 0
+                price = price_1 + price_2
 
             if currency_tx == 'asa':
-                currency = transaction['inner-txns'][1]['asset-transfer-transaction']['asset-id']
-                price = transaction['inner-txns'][1]['asset-transfer-transaction']['amount'] + transaction['inner-txns'][3]['asset-transfer-transaction']['amount']
-
-            if currency_tx == '200':
-                currency = transaction['inner-txns'][1]['application-transaction']['application-id']
-                price = int.from_bytes(
-                    b64decode(
-                        transaction['inner-txns'][1]['application-transaction']['application-args'][2]),
-                    byteorder='big'
-                ) + int.from_bytes(
-                    b64decode(
-                        transaction['inner-txns'][4]['application-transaction']['application-args'][2]),
-                    byteorder='big'
-                )
+                currency = transaction['dt']['itx'][3]['txn']['xaid']
+                price_1 = transaction['dt']['itx'][1]['txn']['aamt'] if 'aamt' in transaction['dt']['itx'][1]['txn'] else 0
+                price_2 = transaction['dt']['itx'][3]['txn']['aamt'] if 'aamt' in transaction['dt']['itx'][3]['txn'] else 0
+                price = price_1 + price_2
 
         if action_tx == 'bid':
-            if currency_tx == '200':
-                currency = transaction['application-transaction']['foreign-apps'][0]
-            if currency_tx == '1' or currency_tx == '1':
-                currency = 0
-            if currency_tx == 'asa':
-                currency = [element for element in indexer_client.applications(transaction['application-transaction']['application-id'])['application']['params']['global-state'] if element['key'] == 'cGFpbWVudF9hc2FfaWQ='][0]['value']['uint']
-            price = [element for element in transaction['global-state-delta'] if b64decode(element['key']) == b'bid_amount'][0]['value']['uint']
+            price = transaction['dt']['gd']['bid_amount']['ui']
 
         print({
             'id': tx_id,
             'from_address': sender,
-            'chain': chain,
+            'chain': CHAIN,
             'app_id': application_id,
             'type': action_tx,
             'amount': price,
@@ -134,7 +132,7 @@ def manager_round(round_num):
         client_supabase.table('transactions').upsert({
             'id': tx_id,
             'from_address': sender,
-            'chain': chain,
+            'chain': CHAIN,
             'app_id': application_id,
             'type': action_tx,
             'amount': price,
