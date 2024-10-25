@@ -2,73 +2,77 @@ version: '3.1'
 
 services:
   prod-indexer-algo-mainnet:
-    image: arcpay/indexer:latest
+    image: arcpay/indexer
     environment:
-      SUPABASE_URL: /run/secrets/prod_supabase_url
-      SUPABASE_KEY: /run/secrets/prod_supabase_key
+      SUPABASE_URL: prod_supabase_url
+      SUPABASE_KEY: prod_supabase_key
       CHAIN: algo:mainnet
       FEES_ADDRESS: 6HCTMFZZ7H3Y2SLTMYNLU73OUOML4X3Q6FSED7UIOFXLN5AKCRSR6EHGJ4
-      ALGOD_ADDRESS: http://localhost:4190
+      ALGOD_ADDRESS: http://arcpay-algonode_algod-mainnet:8080
     secrets:
        - prod_supabase_url
        - prod_supabase_key
+    networks:
+      - arcpay_public
   
   prod-indexer-algo-testnet:
-    image: arcpay/indexer:latest
+    image: arcpay/indexer
     environment:
-      SUPABASE_URL: /run/secrets/prod_supabase_url
-      SUPABASE_KEY: /run/secrets/prod_supabase_key
+      SUPABASE_URL: prod_supabase_url
+      SUPABASE_KEY: prod_supabase_key
       CHAIN: algo:testnet
       FEES_ADDRESS: UTOIVZJSC36XCL4HBVKHFYDA5WMBJQNR7GM3NPK5M7OH2SQBJW3KTUKZAA
-      ALGOD_ADDRESS: http://localhost:4191
+      ALGOD_ADDRESS: http://arcpay-algonode_algod-testnet:8080
     secrets:
        - prod_supabase_url
        - prod_supabase_key
+    networks:
+      - arcpay_public
 
   # prod-indexer-voi-mainnet:
-  #   image: arcpay/indexer:latest
+  #   image: arcpay/indexer
   #   environment:
-  #     SUPABASE_URL: /run/secrets/prod_supabase_url
-  #     SUPABASE_KEY: /run/secrets/prod_supabase_key
+  #     SUPABASE_URL: prod_supabase_url
+  #     SUPABASE_KEY: prod_supabase_key
   #     CHAIN: voi:mainnet
   #     FEES_ADDRESS: <PROD_VOI_MAINNET_FEES_ADDRESS>
-  #     ALGOD_ADDRESS: http://localhost:4192
+  #     ALGOD_ADDRESS: http://arcpay-voinode_algod-mainnet:8080
   #   secrets:
   #      - prod_supabase_url
   #      - prod_supabase_key
   #
   # prod-indexer-voi-testnet:
-  #   image: arcpay/indexer:latest
+  #   image: arcpay/indexer
   #   environment:
-  #     SUPABASE_URL: /run/secrets/prod_supabase_url
-  #     SUPABASE_KEY: /run/secrets/prod_supabase_key
+  #     SUPABASE_URL: prod_supabase_url
+  #     SUPABASE_KEY: prod_supabase_key
   #     CHAIN: voi:testnet
   #     FEES_ADDRESS: <PROD_VOI_TESTNET_FEES_ADDRESS>
-  #     ALGOD_ADDRESS: http://localhost:4193
+  #     ALGOD_ADDRESS: http://arcpay-voinode_algod-testnet:8080
   #   secrets:
   #      - prod_supabase_url
   #      - prod_supabase_key
   #
   # dev-indexer-algo-testnet:
-  #   image: arcpay/indexer:latest
+  #   image: arcpay/indexer
   #   environment:
-  #     SUPABASE_URL: /run/secrets/dev_supabase_url
-  #     SUPABASE_KEY: /run/secrets/dev_supabase_key
+  #     SUPABASE_URL: dev_supabase_url
+  #     SUPABASE_KEY: dev_supabase_key
   #     CHAIN: algo:testnet
   #     FEES_ADDRESS: <DEV_ALGO_TESTNET_FEES_ADDRESS>
-  #     ALGOD_ADDRESS: http://localhost:4191
+  #     ALGOD_ADDRESS: http://arcpay-algonode_algod-testnet:8080
   #   secrets:
   #      - dev_supabase_url
   #      - dev_supabase_key
   #
   # dev-indexer-voi-testnet:
-  #   image: arcpay/indexer:latest
+  #   image: arcpay/indexer
   #   environment:
-  #     SUPABASE_URL: /run/secrets/dev_supabase_url
-  #     SUPABASE_KEY: /run/secrets/dev_supabase_key
+  #     SUPABASE_URL: dev_supabase_url
+  #     SUPABASE_KEY: dev_supabase_key
   #     CHAIN: voi:testnet
   #     FEES_ADDRESS: <DEV_VOI_TESTNET_FEES_ADDRESS>
-  #     ALGOD_ADDRESS: http://localhost:4193
+  #     ALGOD_ADDRESS: http://arcpay-voinode_algod-testnet:8080
   #   secrets:
   #      - dev_supabase_url
   #      - dev_supabase_key
@@ -81,3 +85,8 @@ secrets:
     external: true
   dev_supabase_key:
     external: true
+
+networks:
+  arcpay_public:
+    external: true
+    driver: overlay
