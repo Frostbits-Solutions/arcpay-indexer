@@ -78,3 +78,12 @@ services:
   #   secrets:
   #      - dev_supabase_url
   #      - dev_supabase_key
+secrets:
+  prod_supabase_url:
+    external: true
+  prod_supabase_key:
+    external: true
+  dev_supabase_url:
+    external: true
+  dev_supabase_key:
+    external: true
