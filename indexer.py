@@ -5,19 +5,31 @@ from algosdk.v2client.algod import AlgodClient
 from base64 import b64decode
 from supabase import create_client
 from get_docker_secret import get_docker_secret
+from config import config
+from algosdk import encoding
+
+
+def get_application_address(app_id):
+    to_sign = b"appID" + app_id.to_bytes(8, "big")
+    checksum = encoding.checksum(to_sign)
+    return encoding.encode_address(checksum)
+
 
 SUPABASE_URL = get_docker_secret(os.environ.get('SUPABASE_URL'))
 SUPABASE_KEY = get_docker_secret(os.environ.get('SUPABASE_KEY'))
 CHAIN = os.environ.get('CHAIN', 'algo:testnet')
-FEES_ADDRESS = os.environ.get('FEES_ADDRESS', 'UTOIVZJSC36XCL4HBVKHFYDA5WMBJQNR7GM3NPK5M7OH2SQBJW3KTUKZAA')
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
+FEES_APP_ID = config[CHAIN][ENVIRONMENT]
+FEES_ADDRESS = get_application_address(FEES_APP_ID)
 ALGOD_ADDRESS = os.environ.get('ALGOD_ADDRESS', 'http://localhost:4191')
+ALGOD_TOKEN = os.environ.get('ALGOD_TOKEN', '')
 
 client_supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 algod_client = AlgodClient(
-    algod_token="",
+    algod_token=ALGOD_TOKEN,
     algod_address=ALGOD_ADDRESS,
-    headers={"X-Algo-API-Token": ""},
+    headers={"X-Algo-API-Token": ALGOD_TOKEN},
 )
 
 note_authorized_param = {
