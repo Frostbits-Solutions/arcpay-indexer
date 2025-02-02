@@ -67,8 +67,10 @@ def manager_round(round_num):
     block = algod_client.block_info(round_num)['block']
     if 'txns' not in block:
         return None
+    # relevant_transactions = [txn for txn in block['txns']
+    #                          if 'txn' in txn and 'apat' in txn['txn'] and FEES_ADDRESS in txn['txn']['apat']]
     relevant_transactions = [txn for txn in block['txns']
-                             if 'txn' in txn and 'apat' in txn['txn'] and FEES_ADDRESS in txn['txn']['apat']]
+                             if FEES_ADDRESS in str(txn)]
 
     for transaction in relevant_transactions:
         print("find tx to fees address on this round")
